@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { createRoot } from 'react-dom/client';
 import { ConnectButton } from '@mysten/dapp-kit-react/ui';
 import { DAppKitProvider, useCurrentAccount, useCurrentNetwork, useDAppKit } from '@mysten/dapp-kit-react';
@@ -8,6 +8,7 @@ import {
   ArrowRight,
   BarChart3,
   CheckCircle2,
+  ExternalLink,
   ShieldCheck,
   WalletCards,
   XCircle,
@@ -32,6 +33,8 @@ import {
   buildGuardedLimitOrderTransaction,
   buildWithdrawSuiTransaction,
 } from './guard-tx.js';
+import { applyOpenOrderRecovery, loadDemoState, saveDemoState } from './demo-state.js';
+import { buildProofLinks } from './proof-links.js';
 
 const localManagerKey = 'deepbook-risk-console:balance-manager-id';
 const defaultForm = {
@@ -59,19 +62,21 @@ function RiskConsole() {
   const dapp = useDAppKit();
   const account = useCurrentAccount();
   const network = useCurrentNetwork();
+  const [restoredState] = useState(() => loadDemoState());
   const [form, setForm] = useState(defaultForm);
   const [balanceManagerId, setBalanceManagerId] = useState(
-    () => projectConfig.deepBookBalanceManagerId || localStorage.getItem(localManagerKey) || '',
+    () => projectConfig.deepBookBalanceManagerId || restoredState.balanceManagerId || localStorage.getItem(localManagerKey) || '',
   );
-  const [policyId, setPolicyId] = useState(projectConfig.guardPolicyId);
-  const [orderId, setOrderId] = useState('');
-  const [digest, setDigest] = useState('');
+  const [policyId, setPolicyId] = useState(() => projectConfig.guardPolicyId || restoredState.policyId || '');
+  const [orderId, setOrderId] = useState(() => restoredState.orderId || '');
+  const [digest, setDigest] = useState(() => restoredState.digest || '');
+  const [guardReceiptId, setGuardReceiptId] = useState(() => restoredState.guardReceiptId || '');
   const [log, setLog] = useState(['Connect a Sui wallet to start guarded execution.']);
   const [busy, setBusy] = useState(false);
-  const [depositDone, setDepositDone] = useState(false);
-  const [orderPlaced, setOrderPlaced] = useState(false);
-  const [cancelDone, setCancelDone] = useState(false);
-  const [withdrawDone, setWithdrawDone] = useState(false);
+  const [depositDone, setDepositDone] = useState(() => Boolean(restoredState.depositDone));
+  const [orderPlaced, setOrderPlaced] = useState(() => Boolean(restoredState.orderPlaced));
+  const [cancelDone, setCancelDone] = useState(() => Boolean(restoredState.cancelDone));
+  const [withdrawDone, setWithdrawDone] = useState(() => Boolean(restoredState.withdrawDone));
 
   const normalized = useMemo(() => normalizeRiskInput({ ...DEFAULT_RISK_INPUT, ...form }), [form]);
   const risk = useMemo(() => evaluateRisk(normalized), [normalized]);
@@ -81,6 +86,17 @@ function RiskConsole() {
   const hasPolicy = Boolean(policyId);
   const hasManager = Boolean(balanceManagerId);
   const liveOrderReady = hasWallet && onTestnet && hasGuardPackage && hasPolicy && hasManager && !risk.blocked;
+  const proofLinks = useMemo(
+    () =>
+      buildProofLinks({
+        config: projectConfig,
+        digest,
+        balanceManagerId,
+        policyId,
+        guardReceiptId,
+      }),
+    [digest, balanceManagerId, policyId, guardReceiptId],
+  );
   const actionLocks = getActionLocks({
     busy,
     hasWallet,
@@ -128,6 +144,20 @@ function RiskConsole() {
       withdrawSui,
     },
   });
+
+  useEffect(() => {
+    saveDemoState(localStorage, {
+      balanceManagerId,
+      policyId,
+      orderId,
+      digest,
+      guardReceiptId,
+      depositDone,
+      orderPlaced,
+      cancelDone,
+      withdrawDone,
+    });
+  }, [balanceManagerId, policyId, orderId, digest, guardReceiptId, depositDone, orderPlaced, cancelDone, withdrawDone]);
 
   function updateField(field, value) {
     setForm((current) => ({ ...current, [field]: value }));
@@ -244,7 +274,12 @@ function RiskConsole() {
           guard: normalized,
           risk,
       }),
-      async () => {
+      async (txResult) => {
+        const createdReceipt = extractCreatedObjectId(txResult, `${projectConfig.guardPackageId}::deepbook_risk_console::GuardReceipt`);
+        if (createdReceipt) {
+          setGuardReceiptId(createdReceipt);
+          append(`GuardReceipt created: ${createdReceipt}`);
+        }
         setOrderPlaced(true);
         await refreshOrders({ attempts: 5 });
       },
@@ -263,8 +298,15 @@ function RiskConsole() {
         if (detectedOrderId || attempt === attempts - 1) break;
         await delay(900);
       }
-      setOrderId(detectedOrderId);
-      append(detectedOrderId ? `Open order detected: ${detectedOrderId}` : 'No open orders found for this manager.');
+      const recovered = applyOpenOrderRecovery(detectedOrderId);
+      setOrderId(recovered.orderId);
+      setOrderPlaced(recovered.orderPlaced);
+      setCancelDone(recovered.cancelDone);
+      append(
+        detectedOrderId
+          ? `Open order detected: ${detectedOrderId}`
+          : 'No open orders found for this manager. If this is a resumed session, cancel is already clear; next: withdraw unused SUI.',
+      );
     } catch (error) {
       append(`Open-order refresh failed: ${error.message}`);
     } finally {
@@ -286,7 +328,12 @@ function RiskConsole() {
         guard: normalized,
         risk,
       }),
-      async () => {
+      async (txResult) => {
+        const createdReceipt = extractCreatedObjectId(txResult, `${projectConfig.guardPackageId}::deepbook_risk_console::GuardReceipt`);
+        if (createdReceipt) {
+          setGuardReceiptId(createdReceipt);
+          append(`Cancel receipt created: ${createdReceipt}`);
+        }
         setCancelDone(true);
         append('Cancel confirmed. Next: withdraw unused SUI from the BalanceManager.');
       },
@@ -460,6 +507,7 @@ function RiskConsole() {
       </section>
 
       <section className="receipt">
+        <ProofLinks links={proofLinks} />
         <div>
           <span>Last digest</span>
           <strong>{digest || 'Waiting for signed transaction'}</strong>
@@ -518,6 +566,27 @@ function ActionButton({ children, disabled, reason, onClick }) {
         {children}
       </button>
       <small>{reason || 'Ready'}</small>
+    </div>
+  );
+}
+
+function ProofLinks({ links }) {
+  return (
+    <div className="proofLinks">
+      <span>Proof links</span>
+      {links.length ? (
+        <div className="proofLinkGrid">
+          {links.map((link) => (
+            <a key={link.key} href={link.href} target="_blank" rel="noreferrer">
+              <strong>{link.label}</strong>
+              <small>{link.description}</small>
+              <ExternalLink aria-hidden="true" />
+            </a>
+          ))}
+        </div>
+      ) : (
+        <p>Links appear as soon as wallet-signed testnet transactions and DeepBook objects are available.</p>
+      )}
     </div>
   );
 }

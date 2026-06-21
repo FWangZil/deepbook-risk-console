@@ -13,12 +13,16 @@ const requiredFiles = [
   "src/dapp-kit.js",
   "src/deepbook-client.js",
   "src/guard-tx.js",
+  "src/demo-state.js",
+  "src/proof-links.js",
   "src/integrations/config.js",
   "src/integrations/sui.js",
   "src/integrations/deepbook.js",
   "tests/risk-engine.test.mjs",
   "tests/deepbook-client.test.mjs",
   "tests/guard-tx.test.mjs",
+  "tests/demo-state.test.mjs",
+  "tests/proof-links.test.mjs",
   "tests/testnet-integration-runner.test.mjs",
   "scripts/check-sui.mjs",
   "scripts/testnet-integration.mjs",
@@ -50,6 +54,8 @@ if (video.size < 100_000) {
 run('npm', ['run', 'test:risk']);
 run('npm', ['run', 'test:client']);
 run('npm', ['run', 'test:guard-tx']);
+run('npm', ['run', 'test:demo-state']);
+run('npm', ['run', 'test:proof-links']);
 run('npm', ['run', 'test:integration-runner']);
 run('npm', ['run', 'build']);
 run('sui', ['move', 'build', '--path', 'move', '--build-env', 'testnet', '--warnings-are-errors']);

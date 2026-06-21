@@ -12,6 +12,8 @@
     "test:risk": "node --test tests/risk-engine.test.mjs",
     "test:client": "node --test tests/deepbook-client.test.mjs",
     "test:guard-tx": "node --test tests/guard-tx.test.mjs",
+    "test:demo-state": "node --test tests/demo-state.test.mjs",
+    "test:proof-links": "node --test tests/proof-links.test.mjs",
     "test:integration-runner": "node --test tests/testnet-integration-runner.test.mjs",
     "testnet:integration": "node scripts/testnet-integration.mjs",
     "check:sui": "node scripts/check-sui.mjs",

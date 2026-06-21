@@ -1322,8 +1322,8 @@
       </h1>
       <div data-anim="bottom" style="display:grid;grid-template-rows:auto auto;gap:1.6vh;border-top:1px solid rgba(255,255,255,.22);padding-top:2vh">
         <div data-anim="lead" class="lead" style="max-width:58ch;color:rgba(255,255,255,.86)">
-          <span class="en">A Sui execution console that scores maker risk, creates a guard policy, places a real DeepBook order, records an on-chain receipt, then cancels.</span>
-          <span class="zh">一个 Sui 执行控制台：先评估 maker 风险，再创建守卫策略，真实下 DeepBook 订单，写链上凭证，最后取消订单。</span>
+          <span class="en">A Sui execution console that scores maker risk, creates a guard policy, places a real DeepBook order, records an on-chain receipt, then cancels and recovers unused funds.</span>
+          <span class="zh">一个 Sui 执行控制台：先评估 maker 风险，再创建守卫策略，真实下 DeepBook 订单，写链上凭证，最后取消并回收未使用资金。</span>
         </div>
         <div style="display:flex;justify-content:space-between;align-items:end">
           <div class="t-meta" style="color:rgba(255,255,255,.6)">Overflow 2026 · Sui / DeepBookV3</div>
@@ -1428,10 +1428,12 @@
         <div class="span-6 proof-card">
           <div class="t-meta">DeepBook indexer</div>
           <a class="proof-url deck-link" href="https://deepbook-indexer.testnet.mystenlabs.com/orders/SUI_DBUSDC/0x641710181a1c9e18f50675238754de69ca5926be03d8c61dd91f40ed2ca41bd6?limit=10">/orders/SUI_DBUSDC/{balance_manager}?limit=10</a>
+          <a class="proof-url deck-link" href="https://deepbook-indexer.testnet.mystenlabs.com/order_updates/SUI_DBUSDC?limit=10&balance_manager_id=0x641710181a1c9e18f50675238754de69ca5926be03d8c61dd91f40ed2ca41bd6">/order_updates/SUI_DBUSDC?balance_manager_id=...</a>
         </div>
         <div class="span-6 proof-card dark-card">
           <div class="t-meta" style="color:rgba(255,255,255,.62)">SuiVision</div>
           <a class="proof-url deck-link" style="color:rgba(255,255,255,.82)" href="https://testnet.suivision.xyz/txblock/7KKo4nS8syhJNCstEG8Dg4pC2ccr8GEa7x2bjPsUPNGf">SuiVision transaction · 7KKo4n...</a>
+          <a class="proof-url deck-link" style="color:rgba(255,255,255,.82)" href="https://testnet.suivision.xyz/object/0x0d05865545ea792e4bcd45e0966d30daa1f53b3009a9db2ed35cb8a558f7eebd">GuardReceipt object · 0x0d05...</a>
         </div>
       </div>
     </div>
@@ -1447,8 +1449,8 @@
     <div data-anim="head" style="display:flex;flex-direction:column;gap:1.4vh">
       <div class="t-meta">Operator script</div>
       <h2 class="h-xl-zh" style="font-size:min(5.6vw,9.8vh)">
-        <span class="en">Five clicks that prove the product</span>
-        <span class="zh">五个动作，证明产品成立</span>
+        <span class="en">Five moments that prove the product</span>
+        <span class="zh">五个环节，证明产品成立</span>
       </h2>
     </div>
     <div class="timeline-h nav-safe-bottom" data-anim="timeline">
@@ -1466,7 +1468,7 @@
           <div class="label"><div class="yr">04</div><div class="name"><span class="en">Guarded ask</span><span class="zh">受控卖单</span></div><div class="desc"><span class="en">post-only maker ask</span><span class="zh">post-only maker ask</span></div></div><div class="dot"></div>
         </div>
         <div class="th-node up">
-          <div class="label"><div class="yr">05</div><div class="name"><span class="en">Verify + cancel</span><span class="zh">验证并取消</span></div><div class="desc"><span class="en">indexer + receipt + cancel</span><span class="zh">indexer + 凭证 + 取消</span></div></div><div class="dot"></div>
+          <div class="label"><div class="yr">05</div><div class="name"><span class="en">Exit cleanly</span><span class="zh">安全退出</span></div><div class="desc"><span class="en">verify, cancel, recover SUI</span><span class="zh">验证、取消、回收 SUI</span></div></div><div class="dot"></div>
         </div>
       </div>
     </div>
@@ -1575,7 +1577,7 @@
         <div class="layer-nb">LAYER 03</div>
         <i data-lucide="undo-2" class="lucide"></i>
         <div class="layer-ttl"><span class="en">Cancel receipt</span><span class="zh">取消凭证</span></div>
-        <div class="layer-desc"><span class="en">The workflow does not leave a mystery order behind; cancellation is part of the operating loop.</span><span class="zh">流程不会留下未知订单；取消动作本身就是操作闭环的一部分。</span></div>
+        <div class="layer-desc"><span class="en">Cancel releases order inventory back to the BalanceManager; withdrawal returns unused SUI to the wallet.</span><span class="zh">取消会把订单库存释放回 BalanceManager；提现把未使用 SUI 退回钱包。</span></div>
         <div class="layer-tag">operator-safe ending</div>
       </div>
     </div>
@@ -1628,7 +1630,7 @@
       <div class="sub-card"><div class="nb-corner">03</div><div class="ttl"><span class="en">Policy is on-chain.</span><span class="zh">策略在链上。</span></div><div class="desc"><span class="en">Create GuardPolicy, then reuse the object id.</span><span class="zh">创建 GuardPolicy，并复用对象 ID。</span></div></div>
       <div class="sub-card"><div class="nb-corner">04</div><div class="ttl"><span class="en">DeepBook sees the order.</span><span class="zh">DeepBook 看得到订单。</span></div><div class="desc"><span class="en">Open the indexer URL and show placed status.</span><span class="zh">打开 indexer URL，展示 placed 状态。</span></div></div>
       <div class="sub-card"><div class="nb-corner">05</div><div class="ttl"><span class="en">Sui sees the receipt.</span><span class="zh">Sui 看得到凭证。</span></div><div class="desc"><span class="en">Open SuiVision and show the created GuardReceipt.</span><span class="zh">打开 SuiVision，展示创建的 GuardReceipt。</span></div></div>
-      <div class="sub-card accent"><div class="nb-corner">06</div><div class="ttl"><span class="en">Cancel closes the loop.</span><span class="zh">取消让流程闭环。</span></div><div class="desc"><span class="en">A mature workflow proves entry and exit.</span><span class="zh">成熟流程要证明进入和退出。</span></div></div>
+      <div class="sub-card accent"><div class="nb-corner">06</div><div class="ttl"><span class="en">Cancel, then recover.</span><span class="zh">取消，然后回收。</span></div><div class="desc"><span class="en">Cancel releases funds inside BalanceManager; withdraw returns unused SUI to the wallet.</span><span class="zh">取消释放 BalanceManager 内资金；提现把未使用 SUI 回收到钱包。</span></div></div>
     </div>
   </div>
 </section>
@@ -1647,7 +1649,7 @@
       </h2>
     </div>
     <div class="timeline-v" data-anim="timeline">
-      <div class="tl-node accent"><div class="dot"></div><div class="yr">V1</div><div class="multi">Live</div><div class="desc"><span class="en">Wallet flow, GuardPolicy, guarded ask, DeepBook indexer proof, cancel.</span><span class="zh">钱包流程、GuardPolicy、受控卖单、DeepBook indexer 证明、取消订单。</span></div></div>
+      <div class="tl-node accent"><div class="dot"></div><div class="yr">V1</div><div class="multi">Live</div><div class="desc"><span class="en">Wallet flow, GuardPolicy, guarded ask, DeepBook indexer proof, cancel, unused-SUI recovery.</span><span class="zh">钱包流程、GuardPolicy、受控卖单、DeepBook indexer 证明、取消订单、未使用 SUI 回收。</span></div></div>
       <div class="tl-node"><div class="dot"></div><div class="yr">V2</div><div class="multi">Ops</div><div class="desc"><span class="en">Persist policies, show pool snapshots, fetch open orders, add role-based operator workflow.</span><span class="zh">持久化策略、展示池子快照、拉取开放订单、加入角色化操作流程。</span></div></div>
       <div class="tl-node"><div class="dot"></div><div class="yr">V3</div><div class="multi">Guard</div><div class="desc"><span class="en">Move from receipt-only audit to delegated enforcement and automated cancel/rebalance rules.</span><span class="zh">从仅凭证审计，走向委托执行和自动取消/再平衡规则。</span></div></div>
     </div>

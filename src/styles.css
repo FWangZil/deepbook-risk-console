@@ -312,6 +312,61 @@ button.secondary { width: 100%; margin-top: 9px; color: #1b2433; background: #e7
 .receipt span { color: #8ea0b9; font-size: 12px; font-weight: 900; text-transform: uppercase; }
 .receipt strong { display: block; margin-top: 8px; overflow-wrap: anywhere; color: white; }
 .receipt ol { margin: 0; padding-left: 20px; color: #cad6e6; line-height: 1.55; }
+.proofLinks {
+  display: grid;
+  grid-column: 1 / -1;
+  gap: 10px;
+}
+.proofLinks p {
+  margin: 0;
+  color: #cad6e6;
+  font-size: 14px;
+  line-height: 1.45;
+}
+.proofLinkGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 10px;
+}
+.proofLinkGrid a {
+  position: relative;
+  min-height: 86px;
+  padding: 12px 38px 12px 12px;
+  border: 1px solid rgba(191, 219, 254, 0.18);
+  border-radius: 8px;
+  color: #dbeafe;
+  background: rgba(30, 41, 59, 0.72);
+  text-decoration: none;
+  transition: border-color 140ms ease, background 140ms ease, transform 140ms ease;
+}
+.proofLinkGrid a:hover,
+.proofLinkGrid a:focus-visible {
+  border-color: rgba(147, 197, 253, 0.72);
+  background: rgba(30, 64, 175, 0.38);
+  outline: none;
+  transform: translateY(-1px);
+}
+.proofLinkGrid a strong {
+  margin: 0;
+  color: #ffffff;
+  font-size: 14px;
+  line-height: 1.2;
+}
+.proofLinkGrid a small {
+  display: block;
+  margin-top: 8px;
+  color: #9eb2cc;
+  font-size: 12px;
+  line-height: 1.35;
+}
+.proofLinkGrid a svg {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  width: 16px;
+  height: 16px;
+  color: #93c5fd;
+}
 @media (max-width: 1120px) {
   .consoleGrid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .operatorPanel { grid-template-columns: 1fr; }
