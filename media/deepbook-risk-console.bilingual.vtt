@@ -1,0 +1,37 @@
+WEBVTT
+
+00:00:00.000 --> 00:00:14.000
+DeepBook Risk Console turns a risky trading workflow into a Sui-owned workflow.
+DeepBook Risk Console 把高风险的 交易工作流 变成 Sui 原生工作流。
+
+00:00:14.000 --> 00:00:30.000
+The old workflow is broken: Sui has a powerful native order book, but builders need safer tools to translate strategies into auditable execution plans.
+旧流程的问题是：Sui 已经有强大的原生订单簿，但 builder 仍需要更安全的工具把策略变成可审计执行计划。
+
+00:00:30.000 --> 00:00:48.000
+The wedge is small on purpose: DeepBook Risk Console packages that into a focused MVP: pool risk console and predict scenario scorer.
+切入点故意收窄：DeepBook Risk Console 的 MVP 聚焦一个可评审的端到端流程：它把 DeepBookV3 价格判断和 LP 风控规则组合成钱包签名的小额 testnet 挂单、撤单和链上风控收据。
+
+00:00:48.000 --> 00:00:58.000
+Now the actual local app opens to a dashboard, not a static background loop.
+现在进入真实本地应用：先看到 dashboard，不是静态背景循环。
+
+00:00:58.000 --> 00:01:10.000
+The walkthrough saves a policy, checks an agent request, and only then unlocks wallet approval.
+演示会保存策略、检查 Agent 请求，然后才进入钱包审批。
+
+00:01:10.000 --> 00:01:24.000
+The embedded wallet creates a key, requests local SUI, and signs the guarded transaction.
+内置钱包创建密钥、领取 localnet SUI，并签名受保护交易。
+
+00:01:24.000 --> 00:01:38.000
+One object, one Move call, one digest per run. This is the Sui proof path, not just UI animation.
+一个 object，一个 Move 调用，每次运行一个 digest。这证明的是 Sui 路径，不只是 UI 动画。
+
+00:01:38.000 --> 00:01:54.000
+The submission ships as a standalone repo with app, contracts, scripts, subtitles, and video.
+提交包是独立 repo，包含应用、合约、脚本、字幕和视频。
+
+00:01:54.000 --> 00:02:06.000
+Judge it as a shippable DeepBook wedge, not a slide deck.
+评审重点：这是可发布的 DeepBook 切入点，不是幻灯片。

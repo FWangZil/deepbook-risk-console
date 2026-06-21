@@ -1,0 +1,49 @@
+{
+  "name": "deepbook-risk-console",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "A wallet-connected DeepBookV3 risk console that turns price predictions and LP guardrails into tiny guarded testnet maker orders with on-chain receipts.",
+  "scripts": {
+    "dev": "vite --host 127.0.0.1",
+    "build": "vite build",
+    "preview": "vite preview --host 127.0.0.1",
+    "verify": "node scripts/verify-local.mjs",
+    "test:risk": "node --test tests/risk-engine.test.mjs",
+    "test:client": "node --test tests/deepbook-client.test.mjs",
+    "test:guard-tx": "node --test tests/guard-tx.test.mjs",
+    "test:integration-runner": "node --test tests/testnet-integration-runner.test.mjs",
+    "testnet:integration": "node scripts/testnet-integration.mjs",
+    "check:sui": "node scripts/check-sui.mjs",
+    "build:move": "sui move build --path move --build-env testnet --warnings-are-errors",
+    "publish:move": "bash scripts/publish-move.sh",
+    "video:lint": "hyperframes lint hyperframes",
+    "video:inspect": "hyperframes inspect hyperframes",
+    "video:render": "hyperframes render hyperframes --output media/deepbook-risk-console.hyperframes.mp4 --quality draft --workers 1"
+  },
+  "dependencies": {
+    "@mysten/dapp-kit-core": "^1.6.0",
+    "@mysten/dapp-kit-react": "^2.1.2",
+    "@mysten/deepbook-v3": "^1.5.0",
+    "@mysten/sui": "^2.17.0",
+    "lucide-react": "^0.561.0",
+    "react": "^19.2.3",
+    "react-dom": "^19.2.3",
+    "vite": "8.0.16"
+  },
+  "devDependencies": {
+    "hyperframes": "^0.6.30"
+  },
+  "overrides": {
+    "hyperframes": {
+      "esbuild": "^0.28.1"
+    }
+  },
+  "keywords": [
+    "sui",
+    "sui-overflow-2026",
+    "deepbook",
+    "risk-console",
+    "lp-guard"
+  ]
+}

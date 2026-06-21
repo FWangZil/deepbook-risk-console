@@ -1,0 +1,33 @@
+{
+  "project": "deepbook-risk-console",
+  "network": "testnet",
+  "rpcUrl": "https://fullnode.testnet.sui.io:443",
+  "packageId": "0xf24f1556edab0ba9eb7cf5b0b8961b1618479ae61fbdd3a1693309675bb37be4",
+  "modules": [
+    "deepbook_risk_console"
+  ],
+  "packageDigest": "FFMpNjvXn7syr5qnvQVPq9AafspAorPfBciNzi9r4cEA",
+  "packageVersion": "1",
+  "upgradeCapId": "0x37c0d151437dac30ccae8fa2ed21e060d1d125eaeb4692c665c0d4c50283f958",
+  "upgradeCapDigest": "EovzGMxjFLtPZtf1rWaq1ZfLZ4uapzQvXtRjrp4n6TUK",
+  "publisher": "0x3207352ab5da4b92ce652fdc198169c242962bf23c9112a6cfbf793b7f50ec8a",
+  "digest": "BZWR8qrFCNRR4jnytFtkzHeGdKRRn7NWhyD59R1GRtBM",
+  "checkpoint": "349861711",
+  "timestampMs": "1781776268902",
+  "gasUsed": {
+    "computationCost": "1000000",
+    "storageCost": "17381200",
+    "storageRebate": "978120",
+    "nonRefundableStorageFee": "9880"
+  },
+  "balanceChanges": [
+    {
+      "owner": {
+        "AddressOwner": "0x3207352ab5da4b92ce652fdc198169c242962bf23c9112a6cfbf793b7f50ec8a"
+      },
+      "coinType": "0x2::sui::SUI",
+      "amount": "-17403080"
+    }
+  ],
+  "rawPublishLog": "deployments/testnet-20260618T095103Z.publish.log"
+}

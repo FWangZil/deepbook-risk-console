@@ -1,0 +1,35 @@
+1
+00:00:00,000 --> 00:00:14,000
+DeepBook Risk Console turns a risky trading workflow into a Sui-owned workflow.
+
+2
+00:00:14,000 --> 00:00:30,000
+The old workflow is broken: Sui has a powerful native order book, but builders need safer tools to translate strategies into auditable execution plans.
+
+3
+00:00:30,000 --> 00:00:48,000
+The wedge is small on purpose: DeepBook Risk Console packages that into a focused MVP: pool risk console and predict scenario scorer.
+
+4
+00:00:48,000 --> 00:00:58,000
+Now the actual local app opens to a dashboard, not a static background loop.
+
+5
+00:00:58,000 --> 00:01:10,000
+The walkthrough saves a policy, checks an agent request, and only then unlocks wallet approval.
+
+6
+00:01:10,000 --> 00:01:24,000
+The embedded wallet creates a key, requests local SUI, and signs the guarded transaction.
+
+7
+00:01:24,000 --> 00:01:38,000
+One object, one Move call, one digest per run. This is the Sui proof path, not just UI animation.
+
+8
+00:01:38,000 --> 00:01:54,000
+The submission ships as a standalone repo with app, contracts, scripts, subtitles, and video.
+
+9
+00:01:54,000 --> 00:02:06,000
+Judge it as a shippable DeepBook wedge, not a slide deck.

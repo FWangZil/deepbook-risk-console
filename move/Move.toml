@@ -1,0 +1,8 @@
+[package]
+name = "DeepbookRiskConsole"
+edition = "2024"
+
+[dependencies]
+
+[addresses]
+deepbook_risk_console = "0x0"

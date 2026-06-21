@@ -1,0 +1,6 @@
+{
+  "model": "gpt-image-1.5",
+  "useCase": "ui-mockup",
+  "output": "public/generated/images/deepbook-risk-console.png",
+  "prompt": "Create a polished 16:10 hero visual for the Sui Overflow 2026 hackathon project \"DeepBook Risk Console\".\nTrack: DeepBook.\nProduct concept: A wallet-connected DeepBookV3 risk console that turns price predictions and LP guardrails into tiny guarded testnet maker orders with on-chain receipts.\nVisual style: premium product UI mockup, clean Sui-native blockchain dashboard, refined typography, credible fintech/AI infrastructure aesthetic.\nComposition: large readable product title, one central app interface or workflow visualization, three compact metric modules, no stock-photo people, no watermarks.\nConstraints: English only, avoid fake brand logos, avoid clutter, make the image suitable for a hackathon demo landing page and video cover."
+}
