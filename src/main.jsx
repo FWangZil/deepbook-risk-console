@@ -1,5 +1,6 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { createRoot } from 'react-dom/client';
+import logoUrl from '../media/logo.png';
 import { ConnectButton } from '@mysten/dapp-kit-react/ui';
 import { DAppKitProvider, useCurrentAccount, useCurrentNetwork, useDAppKit } from '@mysten/dapp-kit-react';
 import {
@@ -360,7 +361,7 @@ function RiskConsole() {
   return (
     <main>
       <nav className="topbar">
-        <strong>DeepBook Risk Console</strong>
+        <img src={logoUrl} alt="DeepBook Risk Console" className="topbar-logo" />
         <span>Guarded Sui execution</span>
         <ConnectButton />
       </nav>

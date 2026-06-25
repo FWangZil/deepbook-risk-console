@@ -17,6 +17,7 @@ main { width: min(1440px, calc(100% - 40px)); margin: 0 auto; padding: 22px 0 56
   min-height: 58px;
 }
 .topbar strong { font-size: 18px; }
+.topbar-logo { height: 40px; width: auto; display: block; }
 .topbar span { color: #5d6a7b; font-size: 13px; font-weight: 800; text-transform: uppercase; }
 .hero {
   display: grid;
