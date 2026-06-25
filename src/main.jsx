@@ -37,6 +37,15 @@ import {
 import { applyOpenOrderRecovery, loadDemoState, saveDemoState } from './demo-state.js';
 import { buildProofLinks } from './proof-links.js';
 
+function Brand() {
+  return (
+    <div className="brand">
+      <img src={logoUrl} alt="DeepBook Risk Console" className="brand-logo" />
+      <strong>DeepBook Risk Console</strong>
+    </div>
+  );
+}
+
 const localManagerKey = 'deepbook-risk-console:balance-manager-id';
 const defaultForm = {
   midPrice: '3.42',
@@ -98,6 +107,8 @@ function RiskConsole() {
       }),
     [digest, balanceManagerId, policyId, guardReceiptId],
   );
+  const decisionPhase = cancelDone ? 'complete' : orderPlaced || orderId ? 'executed' : 'preflight';
+
   const actionLocks = getActionLocks({
     busy,
     hasWallet,
@@ -361,9 +372,11 @@ function RiskConsole() {
   return (
     <main>
       <nav className="topbar">
-        <img src={logoUrl} alt="DeepBook Risk Console" className="topbar-logo" />
-        <span>Guarded Sui execution</span>
-        <ConnectButton />
+        <Brand />
+        <div className="topbar-right">
+          <span>Guarded Sui execution</span>
+          <ConnectButton />
+        </div>
       </nav>
 
       <section className="hero">
@@ -374,12 +387,7 @@ function RiskConsole() {
             against guardrails, writes a Sui receipt, and keeps cancel controls one click away.
           </p>
         </div>
-        <div className={`decision decision-${risk.status.toLowerCase()}`}>
-          {risk.status === 'PASS' ? <CheckCircle2 /> : risk.status === 'WARN' ? <AlertTriangle /> : <XCircle />}
-          <span>Risk decision</span>
-          <strong>{risk.status}</strong>
-          <small>{risk.summary}</small>
-        </div>
+        <RiskDecisionBadge risk={risk} phase={decisionPhase} />
       </section>
 
       <section className="operatorPanel" aria-label="Demo operator">
@@ -567,6 +575,55 @@ function ActionButton({ children, disabled, reason, onClick }) {
         {children}
       </button>
       <small>{reason || 'Ready'}</small>
+    </div>
+  );
+}
+
+function getDecisionView({ risk, phase }) {
+  if (phase === 'complete') {
+    return {
+      statusClass: 'pass',
+      icon: <CheckCircle2 />,
+      eyebrow: 'Lifecycle complete',
+      word: 'DONE',
+      summary: 'Order placed, cancelled, and unused SUI recovered on-chain.',
+      grade: null,
+      dim: false,
+    };
+  }
+  if (phase === 'executed') {
+    return {
+      statusClass: risk.status.toLowerCase(),
+      icon: <Activity />,
+      eyebrow: 'Order live on DeepBook',
+      word: 'LIVE',
+      summary: 'Guarded maker ask is live with an on-chain guard receipt. Cancel is one click away.',
+      grade: risk.status,
+      dim: false,
+    };
+  }
+  return {
+    statusClass: risk.status.toLowerCase(),
+    icon: risk.status === 'PASS' ? <CheckCircle2 /> : risk.status === 'WARN' ? <AlertTriangle /> : <XCircle />,
+    eyebrow: 'Pre-flight forecast',
+    word: risk.blocked ? 'BLOCKED' : 'PENDING',
+    summary: risk.blocked
+      ? `Prediction only — ${risk.summary}`
+      : `Prediction only, no order placed yet — ${risk.summary}`,
+    grade: risk.status,
+    dim: !risk.blocked,
+  };
+}
+
+function RiskDecisionBadge({ risk, phase }) {
+  const view = getDecisionView({ risk, phase });
+  return (
+    <div className={`decision decision-${view.statusClass}${view.dim ? ' decision-dim' : ''}`}>
+      {view.icon}
+      <span>{view.eyebrow}</span>
+      <strong>{view.word}</strong>
+      {view.grade ? <em className={`decision-grade decision-grade-${view.statusClass}`}>Risk score: {view.grade}</em> : null}
+      <small>{view.summary}</small>
     </div>
   );
 }
