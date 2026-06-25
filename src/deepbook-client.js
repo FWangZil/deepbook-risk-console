@@ -47,6 +47,41 @@ export async function fetchOrderBookRange(client, { poolKey = projectConfig.deep
   return client.deepbook.getLevel2Range(poolKey, Math.max(0.0001, midPrice - width), midPrice + width, isBid);
 }
 
+export async function fetchMarketQuote(client, { poolKey = projectConfig.deepBookPoolKey, ticks = 10 } = {}) {
+  if (!client?.deepbook) throw new Error('DeepBook client is not initialized.');
+  const [midResult, level2] = await Promise.allSettled([
+    client.deepbook.midPrice(poolKey),
+    client.deepbook.getLevel2TicksFromMid(poolKey, ticks),
+  ]);
+
+  const ticksData = level2.status === 'fulfilled' ? level2.value : null;
+  const bestBid = bestPrice(ticksData?.bid_prices, 'bid');
+  const bestAsk = bestPrice(ticksData?.ask_prices, 'ask');
+
+  let midPrice = midResult.status === 'fulfilled' ? toFiniteNumber(midResult.value) : null;
+  if (midPrice == null && bestBid != null && bestAsk != null) {
+    midPrice = Number(((bestBid + bestAsk) / 2).toFixed(9));
+  }
+
+  if (midPrice == null && bestBid == null && bestAsk == null) {
+    throw new Error('DeepBook returned no market price for this pool.');
+  }
+
+  return { poolKey, midPrice, bestBid, bestAsk };
+}
+
+function bestPrice(prices, side) {
+  if (!Array.isArray(prices)) return null;
+  const valid = prices.map(toFiniteNumber).filter((value) => value != null && value > 0);
+  if (!valid.length) return null;
+  return side === 'bid' ? Math.max(...valid) : Math.min(...valid);
+}
+
+function toFiniteNumber(value) {
+  const parsed = Number(value);
+  return Number.isFinite(parsed) ? parsed : null;
+}
+
 export async function ensureTransactionDetails(client, result) {
   const changedObjects = result?.effects?.changedObjects || result?.effects?.changed_objects || [];
   if (changedObjects.length && result?.objectTypes) return result;

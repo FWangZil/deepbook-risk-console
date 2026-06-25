@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { createRoot } from 'react-dom/client';
 import logoUrl from '../media/logo.png';
 import { ConnectButton } from '@mysten/dapp-kit-react/ui';
@@ -21,6 +21,7 @@ import {
   createDeepBookClient,
   ensureTransactionDetails,
   extractCreatedObjectId,
+  fetchMarketQuote,
   fetchOpenOrders,
   isStaleObjectVersionError,
   normalizeOrderId,
@@ -87,6 +88,9 @@ function RiskConsole() {
   const [orderPlaced, setOrderPlaced] = useState(() => Boolean(restoredState.orderPlaced));
   const [cancelDone, setCancelDone] = useState(() => Boolean(restoredState.cancelDone));
   const [withdrawDone, setWithdrawDone] = useState(() => Boolean(restoredState.withdrawDone));
+  const [marketBusy, setMarketBusy] = useState(false);
+  const [marketQuote, setMarketQuote] = useState(null);
+  const autoFetchedAddress = useRef('');
 
   const normalized = useMemo(() => normalizeRiskInput({ ...DEFAULT_RISK_INPUT, ...form }), [form]);
   const risk = useMemo(() => evaluateRisk(normalized), [normalized]);
@@ -170,6 +174,17 @@ function RiskConsole() {
       withdrawDone,
     });
   }, [balanceManagerId, policyId, orderId, digest, guardReceiptId, depositDone, orderPlaced, cancelDone, withdrawDone]);
+
+  useEffect(() => {
+    if (!hasWallet || !onTestnet) {
+      autoFetchedAddress.current = '';
+      return;
+    }
+    if (autoFetchedAddress.current === account.address) return;
+    autoFetchedAddress.current = account.address;
+    fetchMarketPrice();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [hasWallet, onTestnet, account?.address]);
 
   function updateField(field, value) {
     setForm((current) => ({ ...current, [field]: value }));
@@ -326,6 +341,46 @@ function RiskConsole() {
     }
   }
 
+  async function fetchMarketPrice() {
+    if (!account?.address) {
+      append('Connect a wallet before fetching DeepBook market price.');
+      return;
+    }
+    if (!onTestnet) {
+      append('Switch the wallet to testnet to read the DeepBook market.');
+      return;
+    }
+    setMarketBusy(true);
+    try {
+      const client = createDeepBookClient({ address: account.address, balanceManagerId });
+      const quote = await fetchMarketQuote(client, { poolKey: projectConfig.deepBookPoolKey });
+      setMarketQuote(quote);
+
+      const updates = {};
+      if (quote.midPrice != null) {
+        updates.midPrice = formatPrice(quote.midPrice);
+      }
+      const makerAsk = deriveMakerAsk(quote, normalized.minSpreadBps);
+      if (makerAsk != null) {
+        updates.orderPrice = formatPrice(makerAsk);
+      }
+      if (Object.keys(updates).length) {
+        setForm((current) => ({ ...current, ...updates }));
+      }
+
+      append(
+        `DeepBook ${projectConfig.deepBookPoolKey} market: mid ${fmt(quote.midPrice)}, best bid ${fmt(quote.bestBid)}, best ask ${fmt(quote.bestAsk)} DBUSDC.`,
+      );
+      if (makerAsk != null) {
+        append(`Maker ask price set to ${formatPrice(makerAsk)} DBUSDC (kept above mid to stay post-only).`);
+      }
+    } catch (error) {
+      append(`Market price fetch failed: ${error.message}`);
+    } finally {
+      setMarketBusy(false);
+    }
+  }
+
   async function cancelOrder() {
     if (!orderId) {
       append('Paste or refresh a protocol order id before canceling.');
@@ -439,6 +494,24 @@ function RiskConsole() {
           <Field label="Order size" value={form.quantity} onChange={(value) => updateField('quantity', value)} suffix="SUI" />
           <Field label="Base inventory" value={form.inventoryBase} onChange={(value) => updateField('inventoryBase', value)} suffix="SUI" />
           <Field label="Quote inventory" value={form.inventoryQuote} onChange={(value) => updateField('inventoryQuote', value)} suffix="DBUSDC" />
+          <button
+            type="button"
+            className="secondary"
+            disabled={marketBusy || !hasWallet || !onTestnet}
+            onClick={fetchMarketPrice}
+          >
+            {marketBusy ? 'Fetching DeepBook market...' : 'Fetch live DeepBook price'}
+          </button>
+          {marketQuote ? (
+            <small className="marketHint">
+              Live {projectConfig.deepBookPoolKey}: mid {fmt(marketQuote.midPrice)} · bid {fmt(marketQuote.bestBid)} · ask{' '}
+              {fmt(marketQuote.bestAsk)} DBUSDC
+            </small>
+          ) : (
+            <small className="marketHint">
+              Connect on testnet, then pull the real SUI/DBUSDC mid and best ask from DeepBook.
+            </small>
+          )}
         </Panel>
 
         <Panel title="LP guardrails" icon={<ShieldCheck />}>
@@ -566,6 +639,28 @@ function Status({ label, value }) {
 
 function delay(ms) {
   return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
+function deriveMakerAsk(quote, minSpreadBps) {
+  const mid = quote?.midPrice;
+  if (mid == null || mid <= 0) {
+    return quote?.bestAsk != null && quote.bestAsk > 0 ? quote.bestAsk : null;
+  }
+  const targetSpreadBps = Math.max((minSpreadBps || 0) * 2, 100);
+  const targetAsk = mid * (1 + targetSpreadBps / 10_000);
+  if (quote?.bestAsk != null && quote.bestAsk >= targetAsk) {
+    return quote.bestAsk;
+  }
+  return targetAsk;
+}
+
+function formatPrice(value) {
+  if (value == null || !Number.isFinite(value)) return '';
+  return String(Number(value.toFixed(4)));
+}
+
+function fmt(value) {
+  return value == null || !Number.isFinite(value) ? 'n/a' : String(Number(value.toFixed(4)));
 }
 
 function ActionButton({ children, disabled, reason, onClick }) {

@@ -2,6 +2,7 @@ export {
   createDeepBookClient,
   ensureTransactionDetails,
   extractCreatedObjectId,
+  fetchMarketQuote,
   fetchOpenOrders,
   fetchOrderBookRange,
   normalizeOrderId,
